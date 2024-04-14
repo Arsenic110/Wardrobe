@@ -1,0 +1,133 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsen's Wardrobe</title>
+    <style>
+
+    body 
+    {
+        font-family: 'Segoe UI', Consolas;
+
+        font-weight: lighter !important;
+
+        min-width: var(--scrollbar-width);
+        min-height: var(--scrollbar-height);
+
+        background-color: #171717;
+        color:white;
+    }
+
+    h1, h2, h3, h4, h5, h6, h7, h8
+    {
+        font-weight: inherit;
+    }
+
+    button
+    {
+        font-family: inherit;
+        padding: 0.2rem 0.4rem;
+        margin: 0.1rem -0.1em;
+        border: 2px solid #373737;
+        background-color: #171717;
+        color:white;
+    
+        font-size: medium;
+        transition: 0.2s;
+    }
+    button:hover
+    {
+        border: 2px solid #505050;
+        background-color: #373737;
+    }
+    button:active
+    {
+        border: 2px solid #b5f19c;
+        background-color: #007711;
+    }
+
+    pre
+    {
+        font-size: medium;
+
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -pre-wrap;
+        white-space: -o-pre-wrap;
+        word-wrap: break-word;
+    }
+
+    </style>
+</head>
+<body>
+    <h1>Arsen's Wardrobe</h1>
+
+    <p>Paste the IP I gave you: <textarea style="position:relative;top:0.2rem;resize:none;" id="ip-text" cols="16"  rows="1"></textarea> and click <button onclick="setUrl()">OK</button></p>
+    <p>The networking is retarded though so do not spam it pls ty</p>
+
+    <div id="buttons">
+
+    </div>
+
+    <script>
+        let theurl = "invalid";
+        let thestatus = {};
+        function sendPostRequest(url, jsonData) 
+        {
+            jsonData = JSON.stringify(jsonData);
+            //console.log(`sending POST: ${url} @ ${jsonData}`);
+            fetch(url, 
+            {
+                method: 'POST',
+                headers: 
+                {
+                    'Content-Type': 'application/json'
+                },
+                body: jsonData
+            })
+            .then(response => 
+            {
+                if (!response.ok) 
+                {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => 
+            {
+                //console.log('POST request successful:', data);
+                if(JSON.parse(jsonData).mode == "register")
+                {
+                    for(let d in data)
+                    {
+                        let e = document.createElement("BUTTON");
+                        e.setAttribute('onclick', `sendPostRequest(theurl, { mode: "toggle", part: "${d}" })`);
+                        e.innerHTML = `toggle ${d}`;
+                        document.getElementById("buttons").appendChild(e);
+                    }
+                }
+                else if (JSON.parse(jsonData).mode == "status")
+                {
+                    
+                }
+            })
+            .catch(error => 
+            {
+                console.error('Error sending POST request:', error);
+            });
+        }
+
+        function setUrl()
+        {
+            theurl = "http://" + document.getElementById("ip-text").value + ":8889";
+            sendPostRequest(theurl, { mode: "register" });
+            //setInterval(() => {sendPostRequest(theurl, { mode: "status"})}, 1500);
+        }
+
+    </script>
+</body>
+</html>
+
+
+
+
