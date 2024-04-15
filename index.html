@@ -62,8 +62,10 @@
 <body>
     <h1>Arsen's Wardrobe</h1>
 
-    <p>Paste the IP I gave you: <textarea style="position:relative;top:0.2rem;resize:none;" id="ip-text" cols="16"  rows="1"></textarea> and click <button onclick="setUrl()">OK</button></p>
-    <p>The networking is retarded though so do not spam it pls ty</p>
+    <div id="manual" style="display: none;">
+        <p>Paste the IP I gave you: <textarea style="position:relative;top:0.2rem;resize:none;" id="ip-text" cols="16"  rows="1"></textarea> and click <button onclick="setUrl()">OK</button></p>
+        <p>The networking is retarded though so do not spam it pls ty</p>
+    </div>
 
     <div id="buttons">
 
@@ -72,6 +74,20 @@
     <script>
         let theurl = "invalid";
         let thestatus = {};
+
+        //attempt to get url params
+        let params = window.location.href.split('=');
+        let lastParam = params[params.length - 1];
+
+
+        if(lastParam.split('.').length == 4)
+        {
+            console.log("Autoloading", lastParam);
+            setUrl(String(lastParam));
+        }
+        else
+            document.getElementById("manual").style.display = "block";
+
         function sendPostRequest(url, jsonData) 
         {
             jsonData = JSON.stringify(jsonData);
@@ -113,13 +129,16 @@
             })
             .catch(error => 
             {
-                console.error('Error sending POST request:', error);
+                console.log('Error sending POST request:', error);
             });
         }
 
-        function setUrl()
+        function setUrl(url)
         {
-            theurl = "http://" + document.getElementById("ip-text").value + ":8889";
+            if(!url)
+                theurl = "http://" + document.getElementById("ip-text").value + ":8889";
+            else
+                theurl = `http://${url}:8889`;
             sendPostRequest(theurl, { mode: "register" });
             //setInterval(() => {sendPostRequest(theurl, { mode: "status"})}, 1500);
         }
