@@ -75,6 +75,10 @@ function requestListener(req, res)
 {
     if(req.method == "OPTIONS")
     {
+        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Allow specific HTTP methods
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Allow specific headers
+
         res.writeHead(200);
         res.end();
         return;
@@ -82,57 +86,64 @@ function requestListener(req, res)
 
     console.log("Got a request!");
     let data = '';
-    req.on('data', (chunk) => {data += chunk});
-    req.on('end', () => 
+
+    if(req.method == "POST")
     {
-        console.log("IP:", req.socket.remoteAddress);
-        if(data)
-            data = JSON.parse(data);
 
-        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Allow specific HTTP methods
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Allow specific headers
-
-        if(data == '')
+        req.on('data', (chunk) => {data += chunk});
+        req.on('end', () => 
         {
-            res.writeHead(200);
-            res.end();
-            return;
-        }
-        else if (data.mode == "status" || data.mode == "register")
-        {
-            //send status
-            res.writeHead(200);
-            res.write(JSON.stringify(clothes));
-            res.end();
-        }
-        else if (data.mode == "toggle")
-        {
-            //toggle part
-            let bozo = togglePart(data.part);
-
-            if(bozo)
+            console.log("IP:", req.socket.remoteAddress);
+            if(data)
+                data = JSON.parse(data);
+    
+            if(data == '')
             {
                 res.writeHead(200);
-                res.write("yea no funny games chief");
                 res.end();
+                return;
             }
-            else
+            else if (data.mode == "status" || data.mode == "register")
             {
+                //send status
                 res.writeHead(200);
                 res.write(JSON.stringify(clothes));
                 res.end();
             }
-        }
-        else
-        {
-            console.log("Got some other invalid data??");
-        
-            res.writeHead(200);
-            res.write(JSON.stringify("waiter! waiter! more dumbasses please!"));
-            res.end();
-        }
-    })
+            else if (data.mode == "toggle")
+            {
+                //toggle part
+                let bozo = togglePart(data.part);
+    
+                if(bozo)
+                {
+                    res.writeHead(200);
+                    res.write("yea no funny games chief");
+                    res.end();
+                }
+                else
+                {
+                    res.writeHead(200);
+                    res.write(JSON.stringify(clothes));
+                    res.end();
+                }
+            }
+            else
+            {
+                console.log("Got some other invalid data??");
+            
+                res.writeHead(200);
+                res.write(JSON.stringify("waiter! waiter! more dumbasses please!"));
+                res.end();
+            }
+        });
+
+        return;
+    }
+
+    res.writeHead(200);
+    res.end(require("fs").readFileSync("./index.html"));
+
 }
 
 function togglePart(part)
